@@ -1,4 +1,4 @@
-package cn.majingjing.mq.three;
+package cn.majingjing.mq.four;
 
 import cn.majingjing.mq.util.ConnectionUtils;
 import com.rabbitmq.client.AMQP;
@@ -11,20 +11,19 @@ import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 
 public class Recv2 {
-    private static final String QUEUE_NAME = "queue_three_r2";
-    private static final String EXCHANGE_NAME="test_exchange_fanout";
+    private static final String EXCHANGE_NAME="test_exchange_direct";
 
     public static void main(String[] args) throws Exception {
         Connection connection = ConnectionUtils.getConnection();
         final Channel channel = connection.createChannel();
 
-        //可以知道队列的名称也可以使用匿名队列名
-//        String queueName = QUEUE_NAME;
+        //使用匿名队列,因为消息是发送到交换机上,由交换机进行选择发送到绑定的队列,所以此时队列的名字其实没有什么意义,并且匿名队列在断开连接后会自动删除
         String queueName = channel.queueDeclare().getQueue();
-        //channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
         //将队列绑定到交换机上
-        channel.queueBind(queueName,EXCHANGE_NAME,"");
+        channel.queueBind(queueName,EXCHANGE_NAME,"black");
+        channel.queueBind(queueName,EXCHANGE_NAME,"green");
+        channel.queueBind(queueName,EXCHANGE_NAME,"orange");
 
         channel.basicQos(1);
         Consumer consumer = new DefaultConsumer(channel) {
